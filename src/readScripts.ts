@@ -1,10 +1,13 @@
 import { ScriptsFile } from "./ScriptsFile.ts";
+import { parseYaml } from "./deps.ts";
 
 const jsonFiles = ["flex.json"];
 const jsFiles = ["flex.js"];
-const ymlFiles = ["flex.yaml", "flex.yml"];
+const yamlFiles = ["flex.yaml", "flex.yml"];
 
-type FileReadFn = (file: string) => Promise<ScriptsFile | undefined>;
+type FileReadFn = (
+  file: string
+) => Promise<ScriptsFile | undefined> | ScriptsFile;
 
 /**
  * Reads the scripts from files.
@@ -29,12 +32,17 @@ export async function readScripts(): Promise<ScriptsFile> {
   let scripts: ScriptsFile | undefined;
 
   for (const file of jsonFiles) {
-    const scripts = await tryRun(file, readJsonFiles);
+    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readJsonFiles);
     if (scripts) return scripts;
   }
 
   for (const file of jsFiles) {
-    const scripts = await tryRun(file, readJsFiles);
+    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readJsFiles);
+    if (scripts) return scripts;
+  }
+
+  for (const file of yamlFiles) {
+    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readYamlFiles);
     if (scripts) return scripts;
   }
 
@@ -52,11 +60,16 @@ async function tryRun(file: string, func: FileReadFn) {
 }
 
 const readJsonFiles: FileReadFn = async (file) => {
-  const scriptsFile = await Deno.readTextFile(`${Deno.cwd()}/${file}`);
+  const scriptsFile = await Deno.readTextFile(file);
   return JSON.parse(scriptsFile);
 };
 
 const readJsFiles: FileReadFn = async (file) => {
-  const scriptsFile = await import(`${Deno.cwd()}/${file}`);
+  const scriptsFile = await import(file);
   return scriptsFile.default;
+};
+
+const readYamlFiles: FileReadFn = async (file) => {
+  const rawFile = await Deno.readTextFile(file);
+  return parseYaml(rawFile) as ScriptsFile;
 };

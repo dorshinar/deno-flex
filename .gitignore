@@ -1,3 +1,5 @@
 scripts/
 *flex.json
-flex.js
+*flex.js
+*flex.yml
+*flex.yaml
