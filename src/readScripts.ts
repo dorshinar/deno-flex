@@ -1,5 +1,6 @@
 import { ScriptsFile } from "./ScriptsFile.ts";
-import { parseYaml } from "./deps.ts";
+import { parseYaml, parseToml } from "./deps.ts";
+import { readDecodedFile } from "./readDecodedFile.ts";
 
 type FileReadFn = (
   file: string
@@ -8,7 +9,7 @@ type FileReadFn = (
 type ExtensionsToReader = Record<string, FileReadFn>;
 
 const readJsonFiles: FileReadFn = async (file) => {
-  const scriptsFile = await Deno.readTextFile(file);
+  const scriptsFile = await readDecodedFile(file);
   return JSON.parse(scriptsFile);
 };
 
@@ -18,8 +19,13 @@ const readJsFiles: FileReadFn = async (file) => {
 };
 
 const readYamlFiles: FileReadFn = async (file) => {
-  const rawFile = await Deno.readTextFile(file);
+  const rawFile = await readDecodedFile(file);
   return parseYaml(rawFile) as ScriptsFile;
+};
+
+const readTomlFiles: FileReadFn = async (file) => {
+  const rawFile = await readDecodedFile(file);
+  return parseToml(rawFile) as ScriptsFile;
 };
 
 const fileName = "flex";
@@ -29,6 +35,7 @@ const extensionsWithReader: ExtensionsToReader = {
   ".js": readJsFiles,
   ".yaml": readYamlFiles,
   ".yml": readYamlFiles,
+  ".toml": readTomlFiles,
 };
 
 /**
@@ -67,6 +74,7 @@ export async function readScripts(): Promise<ScriptsFile> {
 
 /**
  * Run a function with given arguments, and ignore a thrown error.
+ *
  * @param func a function to run in a safe way
  * @param args arguments to pass to the given @func
  */
