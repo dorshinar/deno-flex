@@ -1,20 +1,19 @@
+import { ScriptsFile } from "./ScriptsFile.ts";
 import { flexArgs } from "./args.ts";
 
-const scriptsPath = `${Deno.cwd()}/scripts`;
+async function executeScript(script: string) {
+  const args = [...script.split(" "), ...(flexArgs.commandArgs || [])];
 
-async function executeScript(filePath: string) {
   return Deno.run({
-    cmd: ["deno", "run", filePath, ...(flexArgs.commandArgs || [])],
+    cmd: [...args],
   }).status();
 }
 
 async function main() {
-  for await (const dirEntry of Deno.readDir(scriptsPath)) {
-    const fileNameWithoutExtension = dirEntry.name.split(".")[0];
-    if (dirEntry.isFile && fileNameWithoutExtension === flexArgs.command) {
-      await executeScript(`${scriptsPath}/${dirEntry.name}`);
-      break;
-    }
+  const scriptsFile = await Deno.readTextFile(`${Deno.cwd()}/flex.json`);
+  const scripts: ScriptsFile = JSON.parse(scriptsFile);
+  if (flexArgs.command in scripts) {
+    await executeScript(scripts[flexArgs.command]);
   }
 }
 
