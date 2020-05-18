@@ -1,5 +1,6 @@
 import { ScriptsFile } from "./ScriptsFile.ts";
 import { flexArgs } from "./args.ts";
+import { readScripts } from "./readScripts.ts";
 
 async function executeScript(script: string) {
   const args = [...script.split(" "), ...(flexArgs.commandArgs || [])];
@@ -8,8 +9,7 @@ async function executeScript(script: string) {
 }
 
 async function main() {
-  const scriptsFile = await Deno.readTextFile(`${Deno.cwd()}/flex.json`);
-  const scripts: ScriptsFile = JSON.parse(scriptsFile);
+  const scripts: ScriptsFile = await readScripts();
   if (flexArgs.command in scripts) {
     await executeScript(scripts[flexArgs.command]);
   }
