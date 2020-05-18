@@ -4,9 +4,7 @@ import { flexArgs } from "./args.ts";
 async function executeScript(script: string) {
   const args = [...script.split(" "), ...(flexArgs.commandArgs || [])];
 
-  return Deno.run({
-    cmd: [...args],
-  }).status();
+  return Deno.run({ cmd: [...args] }).status();
 }
 
 async function main() {
