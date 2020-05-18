@@ -1,4 +1,4 @@
-import { ScriptsFile } from "./ScriptsFile.ts";
+import { Scripts } from "./ScriptsFile.ts";
 import { flexArgs } from "./args.ts";
 import { readScripts } from "./readScripts.ts";
 
@@ -9,7 +9,7 @@ async function executeScript(script: string) {
 }
 
 async function main() {
-  const scripts: ScriptsFile = await readScripts();
+  const scripts: Scripts = await readScripts();
   if (flexArgs.command in scripts) {
     await executeScript(scripts[flexArgs.command]);
   }

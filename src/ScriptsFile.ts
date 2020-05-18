@@ -1,1 +1,1 @@
-export type ScriptsFile = Record<string, string>;
+export type Scripts = Record<string, string>;

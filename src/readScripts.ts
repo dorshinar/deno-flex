@@ -1,10 +1,8 @@
-import { ScriptsFile } from "./ScriptsFile.ts";
+import { Scripts } from "./ScriptsFile.ts";
 import { parseYaml, parseToml } from "./deps.ts";
 import { readDecodedFile } from "./readDecodedFile.ts";
 
-type FileReadFn = (
-  file: string
-) => Promise<ScriptsFile | undefined> | ScriptsFile;
+type FileReadFn = (file: string) => Promise<Scripts | undefined> | Scripts;
 
 type ExtensionsToReader = Record<string, FileReadFn>;
 
@@ -20,12 +18,12 @@ const readJsFiles: FileReadFn = async (file) => {
 
 const readYamlFiles: FileReadFn = async (file) => {
   const rawFile = await readDecodedFile(file);
-  return parseYaml(rawFile) as ScriptsFile;
+  return parseYaml(rawFile) as Scripts;
 };
 
 const readTomlFiles: FileReadFn = async (file) => {
   const rawFile = await readDecodedFile(file);
-  return parseToml(rawFile) as ScriptsFile;
+  return parseToml(rawFile) as Scripts;
 };
 
 const fileName = "flex";
@@ -57,8 +55,8 @@ const extensionsWithReader: ExtensionsToReader = {
  * }
  * ```
  */
-export async function readScripts(): Promise<ScriptsFile> {
-  let scripts: ScriptsFile | undefined;
+export async function readScripts(): Promise<Scripts> {
+  let scripts: Scripts | undefined;
 
   for (const [ext, reader] of Object.entries(extensionsWithReader)) {
     const scripts = await tryRun(reader, `${Deno.cwd()}/${fileName}${ext}`);
