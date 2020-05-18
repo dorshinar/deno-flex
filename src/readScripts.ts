@@ -1,13 +1,35 @@
 import { ScriptsFile } from "./ScriptsFile.ts";
 import { parseYaml } from "./deps.ts";
 
-const jsonFiles = ["flex.json"];
-const jsFiles = ["flex.js"];
-const yamlFiles = ["flex.yaml", "flex.yml"];
-
 type FileReadFn = (
   file: string
 ) => Promise<ScriptsFile | undefined> | ScriptsFile;
+
+type ExtensionsToReader = Record<string, FileReadFn>;
+
+const readJsonFiles: FileReadFn = async (file) => {
+  const scriptsFile = await Deno.readTextFile(file);
+  return JSON.parse(scriptsFile);
+};
+
+const readJsFiles: FileReadFn = async (file) => {
+  const scriptsFile = await import(file);
+  return scriptsFile.default;
+};
+
+const readYamlFiles: FileReadFn = async (file) => {
+  const rawFile = await Deno.readTextFile(file);
+  return parseYaml(rawFile) as ScriptsFile;
+};
+
+const fileName = "flex";
+
+const extensionsWithReader: ExtensionsToReader = {
+  ".json": readJsonFiles,
+  ".js": readJsFiles,
+  ".yaml": readYamlFiles,
+  ".yml": readYamlFiles,
+};
 
 /**
  * Reads the scripts from files.
@@ -31,18 +53,8 @@ type FileReadFn = (
 export async function readScripts(): Promise<ScriptsFile> {
   let scripts: ScriptsFile | undefined;
 
-  for (const file of jsonFiles) {
-    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readJsonFiles);
-    if (scripts) return scripts;
-  }
-
-  for (const file of jsFiles) {
-    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readJsFiles);
-    if (scripts) return scripts;
-  }
-
-  for (const file of yamlFiles) {
-    const scripts = await tryRun(`${Deno.cwd()}/${file}`, readYamlFiles);
+  for (const [ext, reader] of Object.entries(extensionsWithReader)) {
+    const scripts = await tryRun(reader, `${Deno.cwd()}/${fileName}${ext}`);
     if (scripts) return scripts;
   }
 
@@ -53,23 +65,13 @@ export async function readScripts(): Promise<ScriptsFile> {
   return scripts;
 }
 
-async function tryRun(file: string, func: FileReadFn) {
+/**
+ * Run a function with given arguments, and ignore a thrown error.
+ * @param func a function to run in a safe way
+ * @param args arguments to pass to the given @func
+ */
+async function tryRun(func: FileReadFn, ...args: Parameters<FileReadFn>) {
   try {
-    return await func(file);
+    return await func(...args);
   } catch {}
 }
-
-const readJsonFiles: FileReadFn = async (file) => {
-  const scriptsFile = await Deno.readTextFile(file);
-  return JSON.parse(scriptsFile);
-};
-
-const readJsFiles: FileReadFn = async (file) => {
-  const scriptsFile = await import(file);
-  return scriptsFile.default;
-};
-
-const readYamlFiles: FileReadFn = async (file) => {
-  const rawFile = await Deno.readTextFile(file);
-  return parseYaml(rawFile) as ScriptsFile;
-};
