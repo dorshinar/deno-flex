@@ -1,4 +1,4 @@
-import { Scripts } from "./ScriptsFile.ts";
+import { Scripts } from "./types.ts";
 import { flexArgs } from "./args.ts";
 import { readScripts } from "./readScripts.ts";
 

@@ -1,40 +1,38 @@
-import { Scripts } from "./ScriptsFile.ts";
-import { parseYaml, parseToml } from "./deps.ts";
-import { readDecodedFile } from "./readDecodedFile.ts";
-
-type FileReadFn = (file: string) => Promise<Scripts | undefined> | Scripts;
-
-type ExtensionsToReader = Record<string, FileReadFn>;
-
-const readJsonFiles: FileReadFn = async (file) => {
-  const scriptsFile = await readDecodedFile(file);
-  return JSON.parse(scriptsFile);
-};
-
-const readJsFiles: FileReadFn = async (file) => {
-  const scriptsFile = await import(file);
-  return scriptsFile.default;
-};
-
-const readYamlFiles: FileReadFn = async (file) => {
-  const rawFile = await readDecodedFile(file);
-  return parseYaml(rawFile) as Scripts;
-};
-
-const readTomlFiles: FileReadFn = async (file) => {
-  const rawFile = await readDecodedFile(file);
-  return parseToml(rawFile) as Scripts;
-};
+import { Scripts, FileReadFn } from "./types.ts";
+import {
+  readJsonFiles,
+  readJsFiles,
+  readYamlFiles,
+  readTomlFiles,
+} from "./readJsonFiles.ts";
 
 const fileName = "flex";
 
-const extensionsWithReader: ExtensionsToReader = {
-  ".json": readJsonFiles,
-  ".js": readJsFiles,
-  ".yaml": readYamlFiles,
-  ".yml": readYamlFiles,
-  ".toml": readTomlFiles,
-};
+type ExtensionsToReader = [string, FileReadFn][];
+
+/**
+ * Extensions are stored with their respective file reader in an array, preserving their order.
+ */
+const extensionsWithReader: ExtensionsToReader = [
+  [".json", readJsonFiles],
+  [".js", readJsFiles],
+  [".yaml", readYamlFiles],
+  [".yml", readYamlFiles],
+  [".toml", readTomlFiles],
+];
+
+/**
+ * Run a function with given arguments, and ignore a thrown error.
+ *
+ * @param func a function to run in a safe way.
+ * @param args arguments to pass to the given function.
+ * @see FileReadFn
+ */
+async function tryRun(func: FileReadFn, ...args: Parameters<FileReadFn>) {
+  try {
+    return await func(...args);
+  } catch {}
+}
 
 /**
  * Reads the scripts from files.
@@ -43,6 +41,7 @@ const extensionsWithReader: ExtensionsToReader = {
  * 2. flex.js
  * 3. flex.yaml
  * 4. flex.yml
+ * 5. flex.toml
  * Files paths are relative to the working directory.
  *
  * To use `flex.js`, your scripts should be exported as the default exports.
@@ -58,7 +57,7 @@ const extensionsWithReader: ExtensionsToReader = {
 export async function readScripts(): Promise<Scripts> {
   let scripts: Scripts | undefined;
 
-  for (const [ext, reader] of Object.entries(extensionsWithReader)) {
+  for (const [ext, reader] of extensionsWithReader) {
     const scripts = await tryRun(reader, `${Deno.cwd()}/${fileName}${ext}`);
     if (scripts) return scripts;
   }
@@ -68,16 +67,4 @@ export async function readScripts(): Promise<Scripts> {
   }
 
   return scripts;
-}
-
-/**
- * Run a function with given arguments, and ignore a thrown error.
- *
- * @param func a function to run in a safe way
- * @param args arguments to pass to the given @func
- */
-async function tryRun(func: FileReadFn, ...args: Parameters<FileReadFn>) {
-  try {
-    return await func(...args);
-  } catch {}
 }

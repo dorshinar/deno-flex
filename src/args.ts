@@ -1,9 +1,9 @@
-import { FlexArgs } from "./FlexArgs.ts";
+import { FlexArgs } from "./types.ts";
 
 const { args } = Deno;
 
 /**
- * If no argument is specified, throw an error
+ * If no argument is specified, throw an error.
  */
 if (args.length === 0) {
   throw new Error("No command specified!");
