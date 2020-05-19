@@ -8,7 +8,7 @@ import { FlexArgs } from "./types.ts";
  * @param args arguments to parse
  * @returns parsed arguments.
  */
-export function parseArgs(args: unknown): FlexArgs {
+export function parseArgs(args: string[]): FlexArgs {
   if (!Array.isArray(args) || args.length === 0) {
     throw new Error("No command specified!");
   }
@@ -18,8 +18,13 @@ export function parseArgs(args: unknown): FlexArgs {
     commandArgs = args.slice(2);
   }
 
-  return {
+  let flexArgs: FlexArgs = {
     command: args[0],
-    commandArgs,
   };
+
+  if (commandArgs) {
+    flexArgs = { ...flexArgs, commandArgs };
+  }
+
+  return flexArgs;
 }
