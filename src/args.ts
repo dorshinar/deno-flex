@@ -1,26 +1,30 @@
 import { FlexArgs } from "./types.ts";
 
-const { args } = Deno;
-
 /**
- * If no argument is specified, throw an error.
- */
-if (args.length === 0) {
-  throw new Error("No command specified!");
-}
-
-/**
- * Any argument passed after "--" will be passed on to the executed command.
- * For example:
+ * Parse arguments. If args is not an array, or not an array an error is thrown.
+ * Command name must be separated from the command arguments with "--":
  * $ flex start -- Hello
- * Will run the "start" script, and pass "Hello" as the first argument.
+ *
+ * @param args arguments to parse
+ * @returns parsed arguments.
  */
-let commandArgs: string[] | undefined;
-if (args.length > 0 && args[1] === "--") {
-  commandArgs = args.slice(2);
-}
+export function parseArgs(args: string[]): FlexArgs {
+  if (!Array.isArray(args) || args.length === 0) {
+    throw new Error("No command specified!");
+  }
 
-export const flexArgs: FlexArgs = {
-  command: args[0],
-  commandArgs,
-};
+  let commandArgs: string[] | undefined;
+  if (args.length > 0 && args[1] === "--") {
+    commandArgs = args.slice(2);
+  }
+
+  let flexArgs: FlexArgs = {
+    command: args[0],
+  };
+
+  if (commandArgs) {
+    flexArgs = { ...flexArgs, commandArgs };
+  }
+
+  return flexArgs;
+}
