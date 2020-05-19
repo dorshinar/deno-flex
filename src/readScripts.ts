@@ -4,7 +4,7 @@ import {
   readJsFiles,
   readYamlFiles,
   readTomlFiles,
-} from "./readJsonFiles.ts";
+} from "./readFiles.ts";
 
 const fileName = "flex";
 
