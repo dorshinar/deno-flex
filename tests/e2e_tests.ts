@@ -1,11 +1,18 @@
-import { assertEquals } from "./e2e_deps.ts";
+import { assertEquals, assertThrowsAsync } from "./e2e_deps.ts";
+
+const flexCmd = "flex";
 
 function getCWD(file: string) {
   return `${Deno.cwd()}/tests/test_configs/${file}`;
 }
 
 async function runFlex(cmd: string[], cwd: string) {
-  const process = Deno.run({ cmd: ["flex", ...cmd], cwd, stdout: "piped" });
+  const process = Deno.run({
+    cmd: [flexCmd, ...cmd],
+    cwd,
+    stdout: "piped",
+    stderr: "piped",
+  });
 
   await process.status();
   process.close();
@@ -21,6 +28,11 @@ async function getFlexOutput(cmd: string[], cwd: string) {
   const process = await runFlex(cmd, cwd);
 
   const rawOutput = await process.output();
+  const stderr = decodeOutput(await process.stderrOutput());
+  if (stderr) {
+    throw new Error(stderr);
+  }
+
   return decodeOutput(rawOutput);
 }
 
@@ -62,3 +74,12 @@ scripts.map((script) =>
     );
   })
 );
+
+fileExtensions.map((ext) => {
+  Deno.test(`throws when running unknown script from ${ext} file`, async () => {
+    const script = "test";
+    await assertThrowsAsync(async () => {
+      await getFlexOutput([script], getCWD(ext));
+    });
+  });
+});

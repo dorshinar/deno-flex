@@ -13,6 +13,8 @@ async function main() {
   const scripts: Scripts = await readScripts();
   if (flexArgs.command in scripts) {
     await executeScript(scripts[flexArgs.command], flexArgs);
+  } else {
+    throw new Error("Script not found");
   }
 }
 
