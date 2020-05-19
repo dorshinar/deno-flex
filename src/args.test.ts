@@ -1,6 +1,6 @@
 import { FlexArgs } from "./types.ts";
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-import { assertThrows } from "./testDeps.ts";
+import { assertThrows } from "./test_deps.ts";
 import { parseArgs } from "./args.ts";
 
 Deno.test("throws when args is not an array", () => {
