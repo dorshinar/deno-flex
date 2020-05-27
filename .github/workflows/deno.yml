@@ -19,7 +19,7 @@ jobs:
         run: deno install -Af src/flex.ts
 
       - name: Append deno bin folder to PATH
-        run: echo "::set-env name=PATH::~/.deno/bin:$PATH"
+        run: echo "::set-env name=PATH::/home/runner/.deno/bin:$PATH"
 
       - name: Run tests
         run: deno test --allow-read --allow-run
