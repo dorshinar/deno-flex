@@ -7,19 +7,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-    
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Setup Deno environment
-      uses: denolib/setup-deno@master
-  
-    - name: Install Flex
-      run: deno install -Af src/flex.ts
-    
-    - name: Append deno bin folder to PATH
-      run: echo "::set-env name=PATH::/home/runner/.deno/bin:$PATH"
-      
-    - name: Run tests
-      run: deno test --allow-read --allow-run
+      - uses: actions/checkout@v2
+
+      - name: Setup Deno environment
+        uses: denolib/setup-deno@master
+
+      - name: Install Flex
+        run: deno install -Af src/flex.ts
+
+      - name: Append deno bin folder to PATH
+        run: echo "::set-env name=PATH::~/.deno/bin:$PATH"
+
+      - name: Run tests
+        run: deno test --allow-read --allow-run
