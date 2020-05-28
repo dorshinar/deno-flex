@@ -50,7 +50,6 @@ fileExtensions.map((ext) => {
   scripts.map((script) => {
     Deno.test({
       name: `runs ${script} with no arguments from ${ext} file`,
-      ignore: ext === ".js" && Deno.build.os == "windows",
       async fn() {
         const output = await getFlexOutput([script], getCWD(ext));
         assertEquals(output, `${script} output`);
@@ -59,7 +58,6 @@ fileExtensions.map((ext) => {
 
     Deno.test({
       name: `runs ${script} with 1 argument from ${ext} file`,
-      ignore: ext === ".js" && Deno.build.os == "windows",
       async fn() {
         const args = ["--", "hello"];
         const output = await getFlexOutput([script, ...args], getCWD(ext));
@@ -69,7 +67,6 @@ fileExtensions.map((ext) => {
 
     Deno.test({
       name: `runs ${script} with arguments not preceded by '--' from ${ext} file`,
-      ignore: ext === ".js" && Deno.build.os == "windows",
       async fn() {
         const args = ["hello"];
         const output = await getFlexOutput([script, ...args], getCWD(ext));
@@ -79,7 +76,6 @@ fileExtensions.map((ext) => {
 
     Deno.test({
       name: `runs ${script} with multiple arguments from ${ext} file`,
-      ignore: ext === ".js" && Deno.build.os == "windows",
       async fn() {
         const args = ["hello", "world"];
         const output = await getFlexOutput(
