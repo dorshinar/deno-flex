@@ -3,8 +3,6 @@ import { parseArgs } from "./args.ts";
 import { readScripts } from "./readScripts.ts";
 // import { validatePermissions } from "./validate_permissions.ts";
 
-console.log(Deno.args);
-
 async function executeScript(script: string, args: FlexArgs) {
   const runArgs = [...script.split(" "), ...(args.commandArgs || [])];
 
