@@ -5,6 +5,7 @@ import {
   readYamlFiles,
   readTomlFiles,
 } from "./readFiles.ts";
+import { path } from "./deps.ts";
 
 const fileName = "flex";
 
@@ -58,7 +59,10 @@ export async function readScripts(): Promise<Scripts> {
   let scripts: Scripts | undefined;
 
   for (const [ext, reader] of extensionsWithReader) {
-    const scripts = await tryRun(reader, `${Deno.cwd()}/${fileName}${ext}`);
+    const scripts = await tryRun(
+      reader,
+      path.join(Deno.cwd(), `${fileName}${ext}`)
+    );
     if (scripts) return scripts;
   }
 
