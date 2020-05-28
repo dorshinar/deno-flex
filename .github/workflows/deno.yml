@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -20,6 +20,15 @@ jobs:
 
       - name: Append deno bin folder to PATH
         run: echo "::set-env name=PATH::/home/runner/.deno/bin:$PATH"
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Append deno bin folder to PATH
+        run: echo "::set-env name=PATH::/Users/runner/.deno/bin:$PATH"
+        if: matrix.os == 'macOS-latest'
+
+      - name: Append deno bin folder to PATH
+        run: echo "::set-env name=PATH::%PATH%;C:\Users\runneradmin\.deno\bin"
+        if: matrix.os == 'windows-latest'
 
       - name: Run tests
         run: deno test --allow-read --allow-run
