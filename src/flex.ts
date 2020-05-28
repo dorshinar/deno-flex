@@ -1,7 +1,7 @@
 import { Scripts, FlexArgs } from "./types.ts";
 import { parseArgs } from "./args.ts";
 import { readScripts } from "./readScripts.ts";
-import { validatePermissions } from "./validate_permissions.ts";
+// import { validatePermissions } from "./validate_permissions.ts";
 
 console.log(Deno.args);
 
