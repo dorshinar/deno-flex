@@ -1,9 +1,10 @@
-import { assertEquals, assertThrowsAsync } from "./e2e_deps.ts";
+import { SupportedFile } from "./../src/types.ts";
+import { assertEquals, assertThrowsAsync, path } from "./e2e_deps.ts";
 
 const flexCmd = "flex";
 
 function getCWD(file: string) {
-  return `${Deno.cwd()}/tests/test_configs/${file}`;
+  return path.join(Deno.cwd(), "tests", "test_configs", file);
 }
 
 async function runFlex(cmd: string[], cwd: string) {
@@ -36,44 +37,56 @@ async function getFlexOutput(cmd: string[], cwd: string) {
   return decodeOutput(rawOutput);
 }
 
-const fileExtensions = ["js", "json", "yaml", "yml", "toml"];
+const fileExtensions: SupportedFile[] = [
+  ".js",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".toml",
+];
 const scripts = ["start", "prod"];
 
-scripts.map((script) =>
-  fileExtensions.map((ext) => {
-    Deno.test(`runs ${script} with no arguments from ${ext} file`, async () => {
-      const output = await getFlexOutput([script], getCWD(ext));
-      assertEquals(output, `${script} output`);
+fileExtensions.map((ext) => {
+  scripts.map((script) => {
+    Deno.test({
+      name: `runs ${script} with no arguments from ${ext} file`,
+      async fn() {
+        const output = await getFlexOutput([script], getCWD(ext));
+        assertEquals(output, `${script} output`);
+      },
     });
 
-    Deno.test(`runs ${script} with 1 argument from ${ext} file`, async () => {
-      const args = ["--", "hello"];
-      const output = await getFlexOutput([script, ...args], getCWD(ext));
-      assertEquals(output, `${script} output hello`);
+    Deno.test({
+      name: `runs ${script} with 1 argument from ${ext} file`,
+      async fn() {
+        const args = ["--", "hello"];
+        const output = await getFlexOutput([script, ...args], getCWD(ext));
+        assertEquals(output, `${script} output hello`);
+      },
     });
 
-    Deno.test(
-      `runs ${script} with arguments not preceded by '--' from ${ext} file`,
-      async () => {
+    Deno.test({
+      name: `runs ${script} with arguments not preceded by '--' from ${ext} file`,
+      async fn() {
         const args = ["hello"];
         const output = await getFlexOutput([script, ...args], getCWD(ext));
         assertEquals(output, `${script} output`);
-      }
-    );
+      },
+    });
 
-    Deno.test(
-      `runs ${script} with multiple arguments from ${ext} file`,
-      async () => {
+    Deno.test({
+      name: `runs ${script} with multiple arguments from ${ext} file`,
+      async fn() {
         const args = ["hello", "world"];
         const output = await getFlexOutput(
           [script, "--", ...args],
           getCWD(ext)
         );
         assertEquals(output, `${script} output ${args.join(" ")}`);
-      }
-    );
-  })
-);
+      },
+    });
+  });
+});
 
 fileExtensions.map((ext) => {
   Deno.test(`throws when running unknown script from ${ext} file`, async () => {
