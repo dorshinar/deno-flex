@@ -1,12 +1,20 @@
-import { assertEquals, assertThrowsAsync } from "./e2e_deps.ts";
+import { assertEquals, assertThrowsAsync, path } from "./e2e_deps.ts";
+
+console.log(
+  "Starting to run tests...",
+  JSON.stringify({ cwd: Deno.cwd() }, null, 2)
+);
 
 const flexCmd = "flex";
 
 function getCWD(file: string) {
-  return `${Deno.cwd()}/tests/test_configs/${file}`;
+  return path.join(Deno.cwd(), "tests", "test_configs", file);
 }
 
 async function runFlex(cmd: string[], cwd: string) {
+  for await (const dir of Deno.readDir(cwd)) {
+    console.log(JSON.stringify(dir, null, 2));
+  }
   const process = Deno.run({
     cmd: [flexCmd, ...cmd],
     cwd,
