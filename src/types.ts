@@ -22,3 +22,5 @@ export interface FlexArgs {
   command: string;
   commandArgs?: string[];
 }
+
+export type SupportedFile = ".js" | ".json" | ".toml" | ".yaml" | ".yml";

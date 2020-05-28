@@ -1,4 +1,4 @@
-import { Scripts, FileReadFn } from "./types.ts";
+import { Scripts, FileReadFn, SupportedFile } from "./types.ts";
 import {
   readJsonFiles,
   readJsFiles,
@@ -9,7 +9,7 @@ import { path } from "./deps.ts";
 
 const fileName = "flex";
 
-type ExtensionsToReader = [string, FileReadFn][];
+type ExtensionsToReader = [SupportedFile, FileReadFn][];
 
 /**
  * Extensions are stored with their respective file reader in an array, preserving their order.
@@ -57,12 +57,8 @@ async function tryRun(func: FileReadFn, ...args: Parameters<FileReadFn>) {
  */
 export async function readScripts(): Promise<Scripts> {
   let scripts: Scripts | undefined;
-
   for (const [ext, reader] of extensionsWithReader) {
-    const scripts = await tryRun(
-      reader,
-      path.join(Deno.cwd(), `${fileName}${ext}`)
-    );
+    scripts = await tryRun(reader, path.join(Deno.cwd(), `${fileName}${ext}`));
     if (scripts) return scripts;
   }
 

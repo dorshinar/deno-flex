@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macOS-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -19,7 +19,12 @@ jobs:
         run: deno install -Af src/flex.ts
 
       - name: Append deno bin folder to PATH
-        run: echo "::set-env name=PATH::/home/runner/.deno/bin:$PATH"
+        run: echo "::add-path::/home/runner/.deno/bin"
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Append deno bin folder to PATH
+        run: echo "::add-path::/Users/runner/.deno/bin"
+        if: matrix.os == 'macOS-latest'
 
       - name: Run tests
         run: deno test --allow-read --allow-run

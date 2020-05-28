@@ -1,7 +1,6 @@
 import { parseYaml, parseToml } from "./deps.ts";
-import { Scripts } from "./types.ts";
+import { Scripts, FileReadFn } from "./types.ts";
 import { readDecodedFile } from "./readDecodedFile.ts";
-import { FileReadFn } from "./types.ts";
 
 export const readJsonFiles: FileReadFn = async (file) => {
   const scriptsFile = await readDecodedFile(file);
